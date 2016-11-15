@@ -101,12 +101,13 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
 
     public function dataProviderBasicTransaction()
     {
-        /* @var $fixtureEntities object[] */
-        $fixtureEntities = [
-            'a' => new SampleEntity("Lorem ipsum",    31415, true),
-            'b' => new SampleEntity("dolor sit amet", 92653, false),
-            'c' => new SampleEntity("consetetur",     58979, true),
-        ];
+        $buildFixtures = function () {
+            return [
+                'a' => new SampleEntity("Lorem ipsum",    31415, true),
+                'b' => new SampleEntity("dolor sit amet", 92653, false),
+                'c' => new SampleEntity("consetetur",     58979, true),
+            ];
+        };
 
         /* @var $entityUpdates array */
         $entityUpdates = [
@@ -123,7 +124,7 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
 
         return array(
             [
-                $fixtureEntities,
+                $buildFixtures(),
                 $entityUpdates,
                 true, # doCommit
                 [
@@ -145,7 +146,7 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
                 ]
             ],
             [
-                $fixtureEntities,
+                $buildFixtures(),
                 $entityUpdates,
                 false, # doCommit
                 [
@@ -172,7 +173,7 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider dataProviderTwoTransactionsSequential
      */
-    public function _testTwoTransactionsSequential(
+    public function testTwoTransactionsSequential(
         array $fixtureEntities,
         array $firstEntityUpdates,
         $doCommitFirst,
@@ -219,7 +220,135 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
 
     public function dataProviderTwoTransactionsSequential()
     {
+        $buildFixtures = function () {
+            return [
+                'a' => new SampleEntity("Lorem ipsum",    31415, true),
+                'b' => new SampleEntity("dolor sit amet", 92653, false),
+                'c' => new SampleEntity("consetetur",     58979, true),
+            ];
+        };
+
+        $firstEntityUpdates = [
+            'a' => [
+                'foo' => "sadipscing"
+            ],
+            'b' => [
+                'bar' => 32384
+            ],
+            'c' => [
+                'baz' => false
+            ]
+        ];
+
+        $secondEntityUpdates = [
+            'a' => [
+                'bar' => 62643
+            ],
+            'b' => [
+                'baz' => true
+            ],
+            'c' => [
+                'foo' => "elitr, sed diam"
+            ]
+        ];
+
         return array(
+            [
+                $buildFixtures(),
+                $firstEntityUpdates,
+                true,
+                $secondEntityUpdates,
+                true,
+                [
+                    'a' => [
+                        'foo' => "sadipscing",
+                        'bar' => 62643,
+                        'baz' => true,
+                    ],
+                    'b' => [
+                        'foo' => "dolor sit amet",
+                        'bar' => 32384,
+                        'baz' => true,
+                    ],
+                    'c' => [
+                        'foo' => "elitr, sed diam",
+                        'bar' => 58979,
+                        'baz' => false,
+                    ]
+                ]
+            ],
+            [
+                $buildFixtures(),
+                $firstEntityUpdates,
+                true,
+                $secondEntityUpdates,
+                false,
+                [
+                    'a' => [
+                        'foo' => "sadipscing",
+                        'bar' => 31415,
+                        'baz' => true,
+                    ],
+                    'b' => [
+                        'foo' => "dolor sit amet",
+                        'bar' => 32384,
+                        'baz' => false,
+                    ],
+                    'c' => [
+                        'foo' => "consetetur",
+                        'bar' => 58979,
+                        'baz' => false,
+                    ]
+                ]
+            ],
+            [
+                $buildFixtures(),
+                $firstEntityUpdates,
+                false,
+                $secondEntityUpdates,
+                true,
+                [
+                    'a' => [
+                        'foo' => "Lorem ipsum",
+                        'bar' => 62643,
+                        'baz' => true,
+                    ],
+                    'b' => [
+                        'foo' => "dolor sit amet",
+                        'bar' => 92653,
+                        'baz' => true,
+                    ],
+                    'c' => [
+                        'foo' => "elitr, sed diam",
+                        'bar' => 58979,
+                        'baz' => true,
+                    ]
+                ]
+            ],
+            [
+                $buildFixtures(),
+                $firstEntityUpdates,
+                false,
+                $secondEntityUpdates,
+                false,
+                [
+                    'a' => [
+                        'foo' => "Lorem ipsum",
+                        'bar' => 31415,
+                        'baz' => true,
+                    ],
+                    'b' => [
+                        'foo' => "dolor sit amet",
+                        'bar' => 92653,
+                        'baz' => false,
+                    ],
+                    'c' => [
+                        'foo' => "consetetur",
+                        'bar' => 58979,
+                        'baz' => true,
+                    ]
+                ]
+            ],
         );
     }
 
@@ -227,13 +356,14 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider dataProviderTwoTransactionsNested
      */
-    public function _testTwoTransactionsNested(
+    public function testTwoTransactionsNested(
         array $fixtureEntities,
         array $outerEntityUpdates,
         array $innerEntityUpdates,
         $doCommitInner,
+        array $innerExpectedValues,
         $doCommitOuter,
-        array $expectedValues
+        array $outerExpectedValues
     ) {
         /* @var $entityManager EntityManagerInterface */
         $entityManager = $this->entityManager;
@@ -262,6 +392,8 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
             $entityManager->rollback();
         }
 
+        $this->assertExpectedValuesOnKnownEntities($innerExpectedValues, $knownEntities);
+
         if ($doCommitOuter) {
             $entityManager->commit();
 
@@ -269,12 +401,208 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
             $entityManager->rollback();
         }
 
-        $this->assertExpectedValuesOnKnownEntities($expectedValues, $knownEntities);
+        $this->assertExpectedValuesOnKnownEntities($outerExpectedValues, $knownEntities);
     }
 
     public function dataProviderTwoTransactionsNested()
     {
+        $buildFixtures = function () {
+            return [
+                'a' => new SampleEntity("Lorem ipsum",    31415, true),
+                'b' => new SampleEntity("dolor sit amet", 92653, false),
+                'c' => new SampleEntity("consetetur",     58979, true),
+            ];
+        };
+
+        $outerEntityUpdates = [
+            'a' => [
+                'foo' => "sadipscing"
+            ],
+            'b' => [
+                'bar' => 32384
+            ],
+            'c' => [
+                'baz' => false
+            ]
+        ];
+
+        $innerEntityUpdates = [
+            'a' => [
+                'bar' => 62643
+            ],
+            'b' => [
+                'baz' => true
+            ],
+            'c' => [
+                'foo' => "elitr, sed diam"
+            ]
+        ];
+
         return array(
+            [
+                $buildFixtures(),
+                $outerEntityUpdates,
+                $innerEntityUpdates,
+                true,
+                [
+                    'a' => [
+                        'foo' => "sadipscing",
+                        'bar' => 62643,
+                        'baz' => true,
+                    ],
+                    'b' => [
+                        'foo' => "dolor sit amet",
+                        'bar' => 32384,
+                        'baz' => true,
+                    ],
+                    'c' => [
+                        'foo' => "elitr, sed diam",
+                        'bar' => 58979,
+                        'baz' => false,
+                    ]
+                ],
+                true,
+                [
+                    'a' => [
+                        'foo' => "sadipscing",
+                        'bar' => 62643,
+                        'baz' => true,
+                    ],
+                    'b' => [
+                        'foo' => "dolor sit amet",
+                        'bar' => 32384,
+                        'baz' => true,
+                    ],
+                    'c' => [
+                        'foo' => "elitr, sed diam",
+                        'bar' => 58979,
+                        'baz' => false,
+                    ]
+                ],
+            ],
+            [
+                $buildFixtures(),
+                $outerEntityUpdates,
+                $innerEntityUpdates,
+                true,
+                [
+                    'a' => [
+                        'foo' => "sadipscing",
+                        'bar' => 62643,
+                        'baz' => true,
+                    ],
+                    'b' => [
+                        'foo' => "dolor sit amet",
+                        'bar' => 32384,
+                        'baz' => true,
+                    ],
+                    'c' => [
+                        'foo' => "elitr, sed diam",
+                        'bar' => 58979,
+                        'baz' => false,
+                    ]
+                ],
+                false,
+                [
+                    'a' => [
+                        'foo' => "Lorem ipsum",
+                        'bar' => 31415,
+                        'baz' => true,
+                    ],
+                    'b' => [
+                        'foo' => "dolor sit amet",
+                        'bar' => 92653,
+                        'baz' => false,
+                    ],
+                    'c' => [
+                        'foo' => "consetetur",
+                        'bar' => 58979,
+                        'baz' => true,
+                    ]
+                ]
+            ],
+            [
+                $buildFixtures(),
+                $outerEntityUpdates,
+                $innerEntityUpdates,
+                false,
+                [
+                    'a' => [
+                        'foo' => "sadipscing",
+                        'bar' => 31415,
+                        'baz' => true,
+                    ],
+                    'b' => [
+                        'foo' => "dolor sit amet",
+                        'bar' => 32384,
+                        'baz' => false,
+                    ],
+                    'c' => [
+                        'foo' => "consetetur",
+                        'bar' => 58979,
+                        'baz' => false,
+                    ]
+                ],
+                true,
+                [
+                    'a' => [
+                        'foo' => "sadipscing",
+                        'bar' => 31415,
+                        'baz' => true,
+                    ],
+                    'b' => [
+                        'foo' => "dolor sit amet",
+                        'bar' => 32384,
+                        'baz' => false,
+                    ],
+                    'c' => [
+                        'foo' => "consetetur",
+                        'bar' => 58979,
+                        'baz' => false,
+                    ]
+                ]
+            ],
+            [
+                $buildFixtures(),
+                $outerEntityUpdates,
+                $innerEntityUpdates,
+                false,
+                [
+                    'a' => [
+                        'foo' => "sadipscing",
+                        'bar' => 31415,
+                        'baz' => true,
+                    ],
+                    'b' => [
+                        'foo' => "dolor sit amet",
+                        'bar' => 32384,
+                        'baz' => false,
+                    ],
+                    'c' => [
+                        'foo' => "consetetur",
+                        'bar' => 58979,
+                        'baz' => false,
+                    ]
+                ],
+                false,
+                [
+                    'a' => [
+                        'foo' => "Lorem ipsum",
+                        'bar' => 31415,
+                        'baz' => true,
+                    ],
+                    'b' => [
+                        'foo' => "dolor sit amet",
+                        'bar' => 92653,
+                        'baz' => false,
+                    ],
+                    'c' => [
+                        'foo' => "consetetur",
+                        'bar' => 58979,
+                        'baz' => true,
+                    ]
+                ]
+            ],
         );
     }
 
