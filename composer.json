@@ -1,0 +1,44 @@
+{
+    "name":         "addiks/doctrine2_tweaks",
+    "description":  "Some component-replacements with tweaks and modified behaviour for the doctrine2 project.",
+    "keywords":     ["sql", "database", "php"],
+    "homepage":     "http://addiks.net/doctrine2_tweaks",
+    "type":         "library",
+    "license":      "GPL-3.0",
+    "authors":      [
+        {
+            "name":      "Gerrit Addiks",
+            "email":     "gerrit@addiks.de",
+            "homepage":  "http://addiks.net"
+        }
+    ],
+
+    "require": {
+        "php": ">=5.5.0",
+        "doctrine/orm": "~2.5"
+    },
+
+    "require-dev": {
+        "phpunit/phpunit": "~4.0"
+    },
+
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/addiks/doctrine2.git"
+        }
+    ],
+
+    "autoload": {
+        "psr-4": {
+            "Addiks\\DoctrineTweaks\\":  "src/"
+        }
+    },
+
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
+
+}
