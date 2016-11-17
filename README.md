@@ -34,7 +34,7 @@ part of the state of all managed entities using the UnitOfWork that still contai
 when the transaction begun (resulting in an expensive rollback!).
 
 The process described in the paragraph above allows for a meaningful workflow using transactions. If a process fails
-and causes a rollback, not only the state in the database get's roled back, but also the state of all managed
+and causes a rollback, not only the state in the database get's rolled back, but also the state of all managed
 entities. This allows for the executed and failed process to be re-tried again or to continue with the next process
 using the same entity-manager. This can be done because the state of the runtime is known, it is the same as at the
 beginning of the transaction. This follows the meaning of a "rollback" => The return from a faulty state into a well-
