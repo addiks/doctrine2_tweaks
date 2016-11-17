@@ -439,8 +439,10 @@ class TransactionalEntityManager implements EntityManagerInterface
                 foreach ($classMetadata->reflFields as $name => $reflectionProperty) {
                     /* @var $reflectionProperty ReflectionProperty */
 
-                    $reflectionProperty->setAccessible(true);
-                    $reflectionProperty->setValue($entity, $originalStateData[$name]);
+                    if (isset($originalStateData[$name])) {
+                        $reflectionProperty->setAccessible(true);
+                        $reflectionProperty->setValue($entity, $originalStateData[$name]);
+                    }
                 }
             }
         }

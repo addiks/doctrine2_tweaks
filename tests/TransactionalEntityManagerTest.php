@@ -102,10 +102,12 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
     public function dataProviderBasicTransaction()
     {
         $buildFixtures = function () {
+            $a = new SampleEntity("Lorem ipsum",    31415, true);
+
             return [
-                'a' => new SampleEntity("Lorem ipsum",    31415, true),
-                'b' => new SampleEntity("dolor sit amet", 92653, false),
-                'c' => new SampleEntity("consetetur",     58979, true),
+                'a' => $a,
+                'b' => new SampleEntity("dolor sit amet", 92653, false, $a),
+                'c' => new SampleEntity("consetetur",     58979, true, $a),
             ];
         };
 
@@ -118,7 +120,10 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
                 'bar' => 32384
             ],
             'c' => [
-                'baz' => false
+                'baz' => false,
+                'parent' => function () {
+                    return new SampleEntity("nonumy eirmod", 38327, false);
+                }
             ]
         ];
 
@@ -142,6 +147,9 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
                         'foo' => "consetetur",
                         'bar' => 58979,
                         'baz' => false,
+                        'parent' => [
+                            'foo' => "nonumy eirmod"
+                        ]
                     ]
                 ]
             ],
@@ -164,6 +172,9 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
                         'foo' => "consetetur",
                         'bar' => 58979,
                         'baz' => true,
+                        'parent' => [
+                            'foo' => "Lorem ipsum"
+                        ]
                     ]
                 ]
             ]
@@ -631,6 +642,10 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
             $entity = $knownEntities[$entityId];
 
             foreach ($updates as $memberName => $newValue) {
+                if (is_callable($newValue)) {
+                    $newValue = $newValue();
+                }
+
                 $entity->{$memberName} = $newValue;
             }
         }
@@ -643,10 +658,27 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
         foreach ($expectedValues as $entityId => $values) {
             $entity = $knownEntities[$entityId];
 
-            foreach ($values as $memberName => $expectedValue) {
-                /* @var $actualValue mixed */
-                $actualValue = $entity->{$memberName};
+            $this->assertExpectedValuesOnEntity($values, $entity, $entityId);
+        }
+    }
 
+    private function assertExpectedValuesOnEntity(
+        array $expectedValues,
+        $entity,
+        $entityId
+    ) {
+        foreach ($expectedValues as $memberName => $expectedValue) {
+            /* @var $actualValue mixed */
+            $actualValue = $entity->{$memberName};
+
+            if (is_array($expectedValue)) {
+                $this->assertInstanceOf(SampleEntity::class, $actualValue);
+
+                $entityId .= "." . $memberName;
+
+                $this->assertExpectedValuesOnEntity($expectedValue, $actualValue, $entityId);
+
+            } else {
                 $this->assertEquals($expectedValue, $actualValue, sprintf(
                     "Expected different value in entity %s!",
                     $entityId

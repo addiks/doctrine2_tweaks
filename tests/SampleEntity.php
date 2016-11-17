@@ -13,11 +13,13 @@ namespace Addiks\DoctrineTweaks\Tests;
 use DateTime;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use ReflectionClass;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 class SampleEntity
 {
 
-    public function __construct($foo, $bar, $baz)
+    public function __construct($foo, $bar, $baz, SampleEntity $parent = null)
     {
         static $id = 0;
 
@@ -26,6 +28,13 @@ class SampleEntity
         $this->foo = (string)$foo;
         $this->bar = (int)$bar;
         $this->baz = (bool)$baz;
+
+        $this->parent = $parent;
+        $this->children = new ArrayCollection();
+
+        if (!is_null($parent)) {
+            $parent->children->add($this);
+        }
     }
 
     /**
@@ -48,6 +57,16 @@ class SampleEntity
      */
     public $baz;
 
+    /**
+     * @var SampleEntity
+     */
+    public $parent;
+
+    /**
+     * @var Collection
+     */
+    public $children;
+
     public static function loadMetadata(ClassMetadata $classMetadata)
     {
         $reflectionClass = new ReflectionClass(SampleEntity::class);
@@ -58,6 +77,8 @@ class SampleEntity
             'foo' => $reflectionClass->getProperty('foo'),
             'bar' => $reflectionClass->getProperty('bar'),
             'baz' => $reflectionClass->getProperty('baz'),
+            'parent' => $reflectionClass->getProperty('parent'),
+            'children' => $reflectionClass->getProperty('children'),
         ];
         $classMetadata->fieldMappings = [
             'id' => [
@@ -79,6 +100,49 @@ class SampleEntity
                 'columnName' => 'baz',
                 'fieldName' => 'baz',
                 'type' => 'boolean'
+            ],
+            'parent' => [
+                'columnName' => 'parent',
+                'fieldName' => 'parent',
+                'type' => 'integer',
+                'nullable' => true
+            ],
+        ];
+        $classMetadata->fieldNames = [
+            'id' => 'id',
+            'foo' => 'foo',
+            'bar' => 'bar',
+            'baz' => 'baz',
+            'parent' => 'parent',
+        ];
+        $classMetadata->associationMappings = [
+            'parent' => [
+                'columnName' => 'parent',
+                'fieldName' => 'parent',
+                'type' => ClassMetadata::MANY_TO_ONE,
+                'sourceEntity' => SampleEntity::class,
+                'targetEntity' => SampleEntity::class,
+                'isOwningSide' => true,
+                'mappedBy' => 'children',
+                'joinColumns' => [
+                    'parent' => [
+                        'name' => 'parent',
+                        'referencedColumnName' => 'id',
+                    ],
+                ],
+                'orphanRemoval' => false,
+                'isCascadePersist' => true,
+            ],
+            'children' => [
+                'fieldName' => 'children',
+                'type' => ClassMetadata::ONE_TO_MANY,
+                'sourceEntity' => SampleEntity::class,
+                'targetEntity' => SampleEntity::class,
+                'inversedBy' => 'parent',
+                'orphanRemoval' => false,
+                'isCascadeRemove' => false,
+                'isCascadePersist' => true,
+                'isOwningSide' => false,
             ],
         ];
     }
