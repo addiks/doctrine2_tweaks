@@ -14,13 +14,16 @@ require_once(__DIR__ . "/bootstrap.php");
 if (!function_exists("addiks_doctrinetweaks_tests_auto_loader")) {
     $baseDir = dirname(dirname(__FILE__));
 
+    require_once("{$baseDir}/vendor/doctrine/orm/tests/Doctrine/Tests/TestInit.php");
+    require_once("{$baseDir}/vendor/autoload.php");
+
     function addiks_doctrinetweaks_tests_auto_loader($className)
     {
         $baseDir = dirname(dirname(__FILE__));
 
         foreach ([
             "Addiks\\DoctrineTweaks\\Tests\\" => "%s/tests/%s.php",
-            "Doctrine\\Tests\\"               => "%s/vendor/doctrine/orm/tests/Doctrine/Tests"
+            "Doctrine\\Tests\\"               => "%s/vendor/doctrine/orm/tests/Doctrine/Tests/%s.php"
         ] as $namespace => $format) {
             if (substr($className, 0, strlen($namespace)) === $namespace) {
                 $fileRelevantClassName = substr($className, strlen($namespace));
@@ -38,6 +41,4 @@ if (!function_exists("addiks_doctrinetweaks_tests_auto_loader")) {
 
     spl_autoload_register('addiks_doctrinetweaks_tests_auto_loader');
 
-    require_once("{$baseDir}/vendor/doctrine/orm/tests/Doctrine/Tests/TestInit.php");
-    require_once("{$baseDir}/vendor/autoload.php");
 }
