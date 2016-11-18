@@ -132,6 +132,7 @@ class SampleEntity
                 ],
                 'orphanRemoval' => false,
                 'isCascadePersist' => true,
+                'isCascadeDetach' => false,
             ],
             'children' => [
                 'fieldName' => 'children',
@@ -142,6 +143,7 @@ class SampleEntity
                 'orphanRemoval' => false,
                 'isCascadeRemove' => false,
                 'isCascadePersist' => true,
+                'isCascadeDetach' => false,
                 'isOwningSide' => false,
             ],
         ];

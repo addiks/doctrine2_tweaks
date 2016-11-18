@@ -13,11 +13,6 @@ doctrine2-project.
 
 Manages entities for persistence via ORM.
 
-Only use this implementation of the entity-manager if you know what you are doing. If someone told you to use this
-because "it is better", make sure to understand what the differences are between this entity-manager and the original
-entity-manager shipped in the doctrine ORM and what the implications are. This may cause errors and/or bugs if it is
-directly replacing doctrine's original entity-manager for third-party-code that is written with the original in mind.
-
 This entity-manager poses an alternative to doctrine's own entity-manager. In contrast to doctrine's entity-manager,
 this entity-manager never closes. Instead, on rollback it rolls the managed part of all managed entities back to the
 point of when the transaction was created.
@@ -26,12 +21,19 @@ It does this by managing not only one UnitOfWork, but a stack of UnitOfWork-inst
 open transaction plus the root-UnitOfWork. Each UnitOfWork in this stack contains the state of managed entities from
 the time when the next transaction started. The top UnitOfWork on the stack is always the one currently used. When a
 transaction begins, the topmost UnitOfWork is cloned and the clone put on top of the stack becoming the new current
-UnitOfWork. When a transaction get's committed, the secont-topmost UnitOfWork get's removed from the stack, replaced
-by the current and topmost UnitOfWork (resulting in a cheap commit). When a transaction get's rolled back, the
-topmost UnitOfWork get's discarded and it's previous UnitOfWork (which still contains the state of the entities of
-when the transaction begun becomes the new topmost and current UnitOfWork. A rollback also rolls back the managed
-part of the state of all managed entities using the UnitOfWork that still contains the state of the managed entities
-when the transaction begun (resulting in an expensive rollback!).
+UnitOfWork.
+
+When a transaction get's committed, the secont-topmost UnitOfWork get's removed from the stack, replaced by the
+current and topmost UnitOfWork. There is also an alternative method to commit called "commitAndDetachNewEntities"
+that also detaches all entities that were not known at the beginning of the transaction, which may be what you want
+to do for every iteration in batch-processing in order to prevent having an enourmous amount of entities managed.
+
+When a transaction get's rolled back, the topmost UnitOfWork get's discarded and it's previous UnitOfWork (which
+still contains the state of the entities of  when the transaction begun becomes the new topmost and current one.
+
+There is also an alternative method for rolling back a transaction called "rollbackEntities" that rolls back the
+managed part of the state of all managed entities using the UnitOfWork that still contains the state of the managed
+entities when the transaction begun (resulting in an expensive rollback!).
 
 The process described in the paragraph above allows for a meaningful workflow using transactions. If a process fails
 and causes a rollback, not only the state in the database get's rolled back, but also the state of all managed

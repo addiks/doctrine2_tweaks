@@ -50,35 +50,7 @@ use Addiks\DoctrineTweaks\Proxy\ProxyFactoryFactoryInterface;
 use Addiks\DoctrineTweaks\Proxy\ProxyFactoryFactory;
 
 /**
- * Manages entities for persistence via ORM.
- *
- * Only use this implementation of the entity-manager if you know what you are doing. If someone told you to use this
- * because "it is better", make sure to understand what the differences are between this entity-manager and the original
- * entity-manager shipped in the doctrine ORM and what the implications are. This may cause errors and/or bugs if it is
- * directly replacing doctrine's original entity-manager for third-party-code that is written with the original in mind.
- *
- * This entity-manager poses an alternative to doctrine's own entity-manager. In contrast to doctrine's entity-manager,
- * this entity-manager never closes. Instead, on rollback it rolls the managed part of all managed entities back to the
- * point of when the transaction was created.
- *
- * It does this by managing not only one UnitOfWork, but a stack of UnitOfWork-instances. There is one UnitOfWork per
- * open transaction plus the root-UnitOfWork. Each UnitOfWork in this stack contains the state of managed entities from
- * the time when the next transaction started. The top UnitOfWork on the stack is always the one currently used. When a
- * transaction begins, the topmost UnitOfWork is cloned and the clone put on top of the stack becoming the new current
- * UnitOfWork. When a transaction get's committed, the secont-topmost UnitOfWork get's removed from the stack, replaced
- * by the current and topmost UnitOfWork (resulting in a cheap commit). When a transaction get's rolled back, the
- * topmost UnitOfWork get's discarded and it's previous UnitOfWork (which still contains the state of the entities of
- * when the transaction begun becomes the new topmost and current UnitOfWork. A rollback also rolls back the managed
- * part of the state of all managed entities using the UnitOfWork that still contains the state of the managed entities
- * when the transaction begun (resulting in an expensive rollback!).
- *
- * The process described in the paragraph above allows for a meaningful workflow using transactions. If a process fails
- * and causes a rollback, not only the state in the database get's rolled back, but also the state of all managed
- * entities. This allows for the executed and failed process to be re-tried again or to continue with the next process
- * using the same entity-manager. This can be done because the state of the runtime is known, it is the same as at the
- * beginning of the transaction. This follows the meaning of a "rollback" => The return from a faulty state into a well-
- * known state. If correctly used, this entity-manager could save some developers that care deeply about transactions a
- * big headache.
+ * {@inheritDoc}
  */
 class TransactionalEntityManager implements EntityManagerInterface
 {
@@ -389,9 +361,7 @@ class TransactionalEntityManager implements EntityManagerInterface
     }
 
     /**
-     * Commit's the current UnitOfWork.
-     *
-     * Removes it's previous UnitOfWork from the stack as it is not needed anymore.
+     * {@inheritDoc}
      */
     public function commit()
     {
@@ -406,16 +376,53 @@ class TransactionalEntityManager implements EntityManagerInterface
     }
 
     /**
-     * Discards the current UnitOfWork.
-     *
-     * Reestablishes the previous UnitOfWork as the new current UnitOfWork.
+     * {@inheritDoc}
      */
     public function rollback()
+    {
+        /* @var $connection Connection */
+        $connection = $this->connection;
+
+        $connection->rollBack();
+
+        array_pop($this->unitOfWorkStack);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function commitAndDetachNewEntities()
+    {
+        /* @var $unitOfWork UnitOfWork */
+        $unitOfWork = array_pop($this->unitOfWorkStack);
+
+        /* @var $previousUnitOfWork UnitOfWork */
+        $previousUnitOfWork = array_pop($this->unitOfWorkStack);
+
+        $this->unitOfWorkStack[] = $unitOfWork;
+
+        $unitOfWork->commit();
+
+        foreach ($unitOfWork->getIdentityMap() as $entityClass => $entities) {
+            foreach ($entities as $entity) {
+                /* @var $entity object */
+
+                if (!$previousUnitOfWork->isInIdentityMap($entity)) {
+                    $unitOfWork->detach($entity);
+                }
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function rollbackEntities()
     {
         /* @var $metadataFactory ClassMetadataFactory */
         $metadataFactory = $this->metadataFactory;
 
-        $this->rollbackWithoutEntityUpdates();
+        $this->rollback();
 
         /* @var $unitOfWork UnitOfWork */
         $unitOfWork = $this->getUnitOfWork();
@@ -446,23 +453,6 @@ class TransactionalEntityManager implements EntityManagerInterface
                 }
             }
         }
-    }
-
-    /**
-     * Performs a rollback without actually changing the states of the managed entities.
-     * Use this if you have too many managed entities to rollback.
-     *
-     * (Although having too many entities managed could be a hint to bad design elsewhere.
-     *  Remember to detach entities when you dont need them anymore.)
-     */
-    public function rollbackWithoutEntityUpdates()
-    {
-        /* @var $connection Connection */
-        $connection = $this->connection;
-
-        $connection->rollBack();
-
-        array_pop($this->unitOfWorkStack);
     }
 
     /**

@@ -23,13 +23,14 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Addiks\DoctrineTweaks\Tests\SampleEntity;
 use Addiks\DoctrineTweaks\TransactionalEntityManager;
+use Addiks\DoctrineTweaks\TransactionalEntityManagerInterface;
 use Doctrine\Tests\TestUtil;
 
 class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
 {
 
     /**
-     * @var AddiksEntityManager
+     * @var TransactionalEntityManagerInterface
      */
     protected $entityManager;
 
@@ -53,7 +54,6 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
             $eventManager
         );
 
-        /* @var $schemaTool mixed */
         $schemaTool = new SchemaTool($entityManager);
 
         /* @var $sampleEntityMetadata ClassMetadata */
@@ -75,7 +75,7 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
         $doCommit,
         array $expectedValues
     ) {
-        /* @var $entityManager EntityManagerInterface */
+        /* @var $entityManager TransactionalEntityManagerInterface */
         $entityManager = $this->entityManager;
 
         /* @var $knownEntities object[] */
@@ -93,7 +93,7 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
             $entityManager->commit();
 
         } else {
-            $entityManager->rollback();
+            $entityManager->rollbackEntities();
         }
 
         $this->assertExpectedValuesOnKnownEntities($expectedValues, $knownEntities);
@@ -192,7 +192,7 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
         $doCommitSecond,
         array $expectedValues
     ) {
-        /* @var $entityManager EntityManagerInterface */
+        /* @var $entityManager TransactionalEntityManagerInterface */
         $entityManager = $this->entityManager;
 
         /* @var $knownEntities object[] */
@@ -210,7 +210,7 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
             $entityManager->commit();
 
         } else {
-            $entityManager->rollback();
+            $entityManager->rollbackEntities();
         }
 
         $entityManager->beginTransaction();
@@ -223,7 +223,7 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
             $entityManager->commit();
 
         } else {
-            $entityManager->rollback();
+            $entityManager->rollbackEntities();
         }
 
         $this->assertExpectedValuesOnKnownEntities($expectedValues, $knownEntities);
@@ -408,7 +408,7 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
         $doCommitOuter,
         array $outerExpectedValues
     ) {
-        /* @var $entityManager EntityManagerInterface */
+        /* @var $entityManager TransactionalEntityManagerInterface */
         $entityManager = $this->entityManager;
 
         /* @var $knownEntities object[] */
@@ -432,7 +432,7 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
             $entityManager->commit();
 
         } else {
-            $entityManager->rollback();
+            $entityManager->rollbackEntities();
         }
 
         $this->assertExpectedValuesOnKnownEntities($innerExpectedValues, $knownEntities);
@@ -441,7 +441,7 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
             $entityManager->commit();
 
         } else {
-            $entityManager->rollback();
+            $entityManager->rollbackEntities();
         }
 
         $this->assertExpectedValuesOnKnownEntities($outerExpectedValues, $knownEntities);
@@ -702,6 +702,33 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
                     ]
                 ]
             ],
+        );
+    }
+
+    public function testCommitAndDetachNewEntities()
+    {
+        /* @var $entityManager TransactionalEntityManagerInterface */
+        $entityManager = $this->entityManager;
+
+        $beforeEntity = new SampleEntity("Lorem ipsum", 31415, true);
+
+        $entityManager->persist($beforeEntity);
+        $entityManager->flush($beforeEntity);
+
+        for ($counter = 0; $counter < 100; $counter++) {
+            $entityManager->beginTransaction();
+
+            $entity = new SampleEntity("Lorem ipsum", 31415, true);
+
+            $entityManager->persist($entity);
+            $entityManager->flush($entity);
+
+            $entityManager->commitAndDetachNewEntities();
+        }
+
+        $this->assertEquals(
+            count($entityManager->getUnitOfWork()->getIdentityMap()),
+            1
         );
     }
 
