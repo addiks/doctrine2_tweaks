@@ -5,3 +5,5 @@ php:
   - 7.0
 notifications:
   email: notifications.github@addiks.de
+install:
+    - composer install
