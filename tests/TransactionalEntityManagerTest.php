@@ -117,10 +117,14 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
                 'foo' => "sadipscing"
             ],
             'b' => [
-                'bar' => 32384
+                'embeddable' => [
+                    'bar' => 32384,
+                ]
             ],
             'c' => [
-                'baz' => false,
+                'embeddable' => [
+                    'baz' => false,
+                ],
                 'parent' => function (array $knownEntities) {
                     return $knownEntities['b'];
                 }
@@ -135,18 +139,24 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
                 [
                     'a' => [
                         'foo' => "sadipscing",
-                        'bar' => 31415,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 31415,
+                            'baz' => true,
+                        ]
                     ],
                     'b' => [
                         'foo' => "dolor sit amet",
-                        'bar' => 32384,
-                        'baz' => false,
+                        'embeddable' => [
+                            'bar' => 32384,
+                            'baz' => false,
+                        ]
                     ],
                     'c' => [
                         'foo' => "consetetur",
-                        'bar' => 58979,
-                        'baz' => false,
+                        'embeddable' => [
+                            'bar' => 58979,
+                            'baz' => false,
+                        ],
                         'parent' => [
                             'foo' => "dolor sit amet"
                         ]
@@ -160,18 +170,24 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
                 [
                     'a' => [
                         'foo' => "Lorem ipsum",
-                        'bar' => 31415,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 31415,
+                            'baz' => true,
+                        ],
                     ],
                     'b' => [
                         'foo' => "dolor sit amet",
-                        'bar' => 92653,
-                        'baz' => false,
+                        'embeddable' => [
+                            'bar' => 92653,
+                            'baz' => false,
+                        ],
                     ],
                     'c' => [
                         'foo' => "consetetur",
-                        'bar' => 58979,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 58979,
+                            'baz' => true,
+                        ],
                         'parent' => [
                             'foo' => "Lorem ipsum"
                         ]
@@ -246,10 +262,14 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
                 'foo' => "sadipscing"
             ],
             'b' => [
-                'bar' => 32384
+                'embeddable' => [
+                    'bar' => 32384,
+                ]
             ],
             'c' => [
-                'baz' => false,
+                'embeddable' => [
+                    'baz' => false,
+                ],
                 'parent' => function (array $knownEntities) {
                     return $knownEntities['b'];
                 }
@@ -258,10 +278,14 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
 
         $secondEntityUpdates = [
             'a' => [
-                'bar' => 62643
+                'embeddable' => [
+                    'bar' => 62643
+                ]
             ],
             'b' => [
-                'baz' => true,
+                'embeddable' => [
+                    'baz' => true,
+                ],
                 'parent' => function (array $knownEntities) {
                     return $knownEntities['c'];
                 }
@@ -281,21 +305,27 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
                 [
                     'a' => [
                         'foo' => "sadipscing",
-                        'bar' => 62643,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 62643,
+                            'baz' => true,
+                        ]
                     ],
                     'b' => [
                         'foo' => "dolor sit amet",
-                        'bar' => 32384,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 32384,
+                            'baz' => true,
+                        ],
                         'parent' => [
                             'foo' => "elitr, sed diam"
                         ]
                     ],
                     'c' => [
                         'foo' => "elitr, sed diam",
-                        'bar' => 58979,
-                        'baz' => false,
+                        'embeddable' => [
+                            'bar' => 58979,
+                            'baz' => false,
+                        ],
                         'parent' => [
                             'foo' => "dolor sit amet"
                         ]
@@ -311,21 +341,27 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
                 [
                     'a' => [
                         'foo' => "sadipscing",
-                        'bar' => 31415,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 31415,
+                            'baz' => true,
+                        ],
                     ],
                     'b' => [
                         'foo' => "dolor sit amet",
-                        'bar' => 32384,
-                        'baz' => false,
+                        'embeddable' => [
+                            'bar' => 32384,
+                            'baz' => false,
+                        ],
                         'parent' => [
                             'foo' => "sadipscing"
                         ]
                     ],
                     'c' => [
                         'foo' => "consetetur",
-                        'bar' => 58979,
-                        'baz' => false,
+                        'embeddable' => [
+                            'bar' => 58979,
+                            'baz' => false,
+                        ],
                         'parent' => [
                             'foo' => "dolor sit amet"
                         ]
@@ -341,21 +377,27 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
                 [
                     'a' => [
                         'foo' => "Lorem ipsum",
-                        'bar' => 62643,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 62643,
+                            'baz' => true,
+                        ],
                     ],
                     'b' => [
                         'foo' => "dolor sit amet",
-                        'bar' => 92653,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 92653,
+                            'baz' => true,
+                        ],
                         'parent' => [
                             'foo' => "elitr, sed diam"
                         ]
                     ],
                     'c' => [
                         'foo' => "elitr, sed diam",
-                        'bar' => 58979,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 58979,
+                            'baz' => true,
+                        ],
                         'parent' => [
                             'foo' => "Lorem ipsum"
                         ]
@@ -371,21 +413,27 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
                 [
                     'a' => [
                         'foo' => "Lorem ipsum",
-                        'bar' => 31415,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 31415,
+                            'baz' => true,
+                        ],
                     ],
                     'b' => [
                         'foo' => "dolor sit amet",
-                        'bar' => 92653,
-                        'baz' => false,
+                        'embeddable' => [
+                            'bar' => 92653,
+                            'baz' => false,
+                        ],
                         'parent' => [
                             'foo' => "Lorem ipsum"
                         ]
                     ],
                     'c' => [
                         'foo' => "consetetur",
-                        'bar' => 58979,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 58979,
+                            'baz' => true,
+                        ],
                         'parent' => [
                             'foo' => "Lorem ipsum"
                         ]
@@ -464,10 +512,14 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
                 'foo' => "sadipscing"
             ],
             'b' => [
-                'bar' => 32384
+                'embeddable' => [
+                    'bar' => 32384,
+                ],
             ],
             'c' => [
-                'baz' => false,
+                'embeddable' => [
+                    'baz' => false,
+                ],
                 'parent' => function (array $knownEntities) {
                     return $knownEntities['b'];
                 }
@@ -476,10 +528,14 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
 
         $innerEntityUpdates = [
             'a' => [
-                'bar' => 62643
+                'embeddable' => [
+                    'bar' => 62643
+                ],
             ],
             'b' => [
-                'baz' => true,
+                'embeddable' => [
+                    'baz' => true,
+                ],
                 'parent' => function (array $knownEntities) {
                     return $knownEntities['c'];
                 }
@@ -498,21 +554,27 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
                 [
                     'a' => [
                         'foo' => "sadipscing",
-                        'bar' => 62643,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 62643,
+                            'baz' => true,
+                        ],
                     ],
                     'b' => [
                         'foo' => "dolor sit amet",
-                        'bar' => 32384,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 32384,
+                            'baz' => true,
+                        ],
                         'parent' => [
                             'foo' => "elitr, sed diam"
                         ]
                     ],
                     'c' => [
                         'foo' => "elitr, sed diam",
-                        'bar' => 58979,
-                        'baz' => false,
+                        'embeddable' => [
+                            'bar' => 58979,
+                            'baz' => false,
+                        ],
                         'parent' => [
                             'foo' => "dolor sit amet"
                         ]
@@ -522,21 +584,27 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
                 [
                     'a' => [
                         'foo' => "sadipscing",
-                        'bar' => 62643,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 62643,
+                            'baz' => true,
+                        ],
                     ],
                     'b' => [
                         'foo' => "dolor sit amet",
-                        'bar' => 32384,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 32384,
+                            'baz' => true,
+                        ],
                         'parent' => [
                             'foo' => "elitr, sed diam"
                         ]
                     ],
                     'c' => [
                         'foo' => "elitr, sed diam",
-                        'bar' => 58979,
-                        'baz' => false,
+                        'embeddable' => [
+                            'bar' => 58979,
+                            'baz' => false,
+                        ],
                         'parent' => [
                             'foo' => "dolor sit amet"
                         ]
@@ -551,21 +619,27 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
                 [
                     'a' => [
                         'foo' => "sadipscing",
-                        'bar' => 62643,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 62643,
+                            'baz' => true,
+                        ],
                     ],
                     'b' => [
                         'foo' => "dolor sit amet",
-                        'bar' => 32384,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 32384,
+                            'baz' => true,
+                        ],
                         'parent' => [
                             'foo' => "elitr, sed diam"
                         ]
                     ],
                     'c' => [
                         'foo' => "elitr, sed diam",
-                        'bar' => 58979,
-                        'baz' => false,
+                        'embeddable' => [
+                            'bar' => 58979,
+                            'baz' => false,
+                        ],
                         'parent' => [
                             'foo' => "dolor sit amet"
                         ]
@@ -575,21 +649,27 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
                 [
                     'a' => [
                         'foo' => "Lorem ipsum",
-                        'bar' => 31415,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 31415,
+                            'baz' => true,
+                        ],
                     ],
                     'b' => [
                         'foo' => "dolor sit amet",
-                        'bar' => 92653,
-                        'baz' => false,
+                        'embeddable' => [
+                            'bar' => 92653,
+                            'baz' => false,
+                        ],
                         'parent' => [
                             'foo' => "Lorem ipsum"
                         ]
                     ],
                     'c' => [
                         'foo' => "consetetur",
-                        'bar' => 58979,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 58979,
+                            'baz' => true,
+                        ],
                         'parent' => [
                             'foo' => "Lorem ipsum"
                         ]
@@ -604,21 +684,27 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
                 [
                     'a' => [
                         'foo' => "sadipscing",
-                        'bar' => 31415,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 31415,
+                            'baz' => true,
+                        ],
                     ],
                     'b' => [
                         'foo' => "dolor sit amet",
-                        'bar' => 32384,
-                        'baz' => false,
+                        'embeddable' => [
+                            'bar' => 32384,
+                            'baz' => false,
+                        ],
                         'parent' => [
                             'foo' => "sadipscing"
                         ]
                     ],
                     'c' => [
                         'foo' => "consetetur",
-                        'bar' => 58979,
-                        'baz' => false,
+                        'embeddable' => [
+                            'bar' => 58979,
+                            'baz' => false,
+                        ],
                         'parent' => [
                             'foo' => "dolor sit amet"
                         ]
@@ -628,21 +714,27 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
                 [
                     'a' => [
                         'foo' => "sadipscing",
-                        'bar' => 31415,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 31415,
+                            'baz' => true,
+                        ],
                     ],
                     'b' => [
                         'foo' => "dolor sit amet",
-                        'bar' => 32384,
-                        'baz' => false,
+                        'embeddable' => [
+                            'bar' => 32384,
+                            'baz' => false,
+                        ],
                         'parent' => [
                             'foo' => "sadipscing"
                         ]
                     ],
                     'c' => [
                         'foo' => "consetetur",
-                        'bar' => 58979,
-                        'baz' => false,
+                        'embeddable' => [
+                            'bar' => 58979,
+                            'baz' => false,
+                        ],
                         'parent' => [
                             'foo' => "dolor sit amet"
                         ]
@@ -657,21 +749,27 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
                 [
                     'a' => [
                         'foo' => "sadipscing",
-                        'bar' => 31415,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 31415,
+                            'baz' => true,
+                        ],
                     ],
                     'b' => [
                         'foo' => "dolor sit amet",
-                        'bar' => 32384,
-                        'baz' => false,
+                        'embeddable' => [
+                            'bar' => 32384,
+                            'baz' => false,
+                        ],
                         'parent' => [
                             'foo' => "sadipscing"
                         ]
                     ],
                     'c' => [
                         'foo' => "consetetur",
-                        'bar' => 58979,
-                        'baz' => false,
+                        'embeddable' => [
+                            'bar' => 58979,
+                            'baz' => false,
+                        ],
                         'parent' => [
                             'foo' => "dolor sit amet"
                         ]
@@ -681,21 +779,27 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
                 [
                     'a' => [
                         'foo' => "Lorem ipsum",
-                        'bar' => 31415,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 31415,
+                            'baz' => true,
+                        ],
                     ],
                     'b' => [
                         'foo' => "dolor sit amet",
-                        'bar' => 92653,
-                        'baz' => false,
+                        'embeddable' => [
+                            'bar' => 92653,
+                            'baz' => false,
+                        ],
                         'parent' => [
                             'foo' => "Lorem ipsum"
                         ]
                     ],
                     'c' => [
                         'foo' => "consetetur",
-                        'bar' => 58979,
-                        'baz' => true,
+                        'embeddable' => [
+                            'bar' => 58979,
+                            'baz' => true,
+                        ],
                         'parent' => [
                             'foo' => "Lorem ipsum"
                         ]
@@ -756,11 +860,23 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
         foreach ($entityUpdates as $entityId => $updates) {
             $entity = $knownEntities[$entityId];
 
-            foreach ($updates as $memberName => $newValue) {
-                if (is_callable($newValue)) {
-                    $newValue = $newValue($knownEntities);
-                }
+            $this->applyEntityUpdatesOnEntity($updates, $entity, $knownEntities);
+        }
+    }
 
+    private function applyEntityUpdatesOnEntity(array $updates, $entity, array $knownEntities = array())
+    {
+        foreach ($updates as $memberName => $newValue) {
+            if (is_callable($newValue)) {
+                $newValue = $newValue($knownEntities);
+            }
+
+            if (is_array($newValue)) {
+                $subEntity = $entity->{$memberName};
+
+                $this->applyEntityUpdatesOnEntity($newValue, $subEntity, $knownEntities);
+
+            } else {
                 $entity->{$memberName} = $newValue;
             }
         }
@@ -787,11 +903,7 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
             $actualValue = $entity->{$memberName};
 
             if (is_array($expectedValue)) {
-                $this->assertInstanceOf(SampleEntity::class, $actualValue);
-
-                $entityId .= "." . $memberName;
-
-                $this->assertExpectedValuesOnEntity($expectedValue, $actualValue, $entityId);
+                $this->assertExpectedValuesOnEntity($expectedValue, $actualValue, "{$entityId}.{$memberName}");
 
             } else {
                 $this->assertEquals($expectedValue, $actualValue, sprintf(

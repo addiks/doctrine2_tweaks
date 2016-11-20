@@ -15,6 +15,7 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 use ReflectionClass;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Addiks\DoctrineTweaks\Tests\SampleEmbeddable;
 
 class SampleEntity
 {
@@ -26,8 +27,8 @@ class SampleEntity
         $this->id = $id++;
 
         $this->foo = (string)$foo;
-        $this->bar = (int)$bar;
-        $this->baz = (bool)$baz;
+
+        $this->embeddable = new SampleEmbeddable($bar, $baz);
 
         $this->parent = $parent;
         $this->children = new ArrayCollection();
@@ -48,14 +49,9 @@ class SampleEntity
     public $foo;
 
     /**
-     * @var integer
+     * @var SampleEmbeddable
      */
-    public $bar;
-
-    /**
-     * @var boolean
-     */
-    public $baz;
+    public $embeddable;
 
     /**
      * @var SampleEntity
@@ -72,49 +68,33 @@ class SampleEntity
         $reflectionClass = new ReflectionClass(SampleEntity::class);
 
         $classMetadata->identifier = ['id'];
-        $classMetadata->reflFields = [
-            'id'  => $reflectionClass->getProperty('id'),
-            'foo' => $reflectionClass->getProperty('foo'),
-            'bar' => $reflectionClass->getProperty('bar'),
-            'baz' => $reflectionClass->getProperty('baz'),
-            'parent' => $reflectionClass->getProperty('parent'),
-            'children' => $reflectionClass->getProperty('children'),
+
+        foreach ([
+            'id' => 'integer',
+            'foo' => 'string',
+            'parent' => 'integer'
+        ] as $name => $type) {
+            $classMetadata->fieldMappings[$name] = [
+                'columnName' => $name,
+                'fieldName' => $name,
+                'type' => $type
+            ];
+
+            $classMetadata->reflFields[$name] = $reflectionClass->getProperty($name);
+            $classMetadata->fieldNames[$name] = $name;
+        }
+
+        $classMetadata->reflFields['children'] = $reflectionClass->getProperty('children');
+        $classMetadata->fieldMappings['parent']['nullable'] = true;
+
+        $classMetadata->reflFields['embeddable'] = $reflectionClass->getProperty('embeddable');
+        $classMetadata->embeddedClasses['embeddable'] = [
+            'class' => SampleEmbeddable::class,
+            'columnPrefix'  => '',
+            'declaredField' => null,
+            'originalField' => null,
         ];
-        $classMetadata->fieldMappings = [
-            'id' => [
-                'columnName' => 'id',
-                'fieldName' => 'id',
-                'type' => 'integer'
-            ],
-            'foo' => [
-                'columnName' => 'foo',
-                'fieldName' => 'foo',
-                'type' => 'string'
-            ],
-            'bar' => [
-                'columnName' => 'bar',
-                'fieldName' => 'bar',
-                'type' => 'integer'
-            ],
-            'baz' => [
-                'columnName' => 'baz',
-                'fieldName' => 'baz',
-                'type' => 'boolean'
-            ],
-            'parent' => [
-                'columnName' => 'parent',
-                'fieldName' => 'parent',
-                'type' => 'integer',
-                'nullable' => true
-            ],
-        ];
-        $classMetadata->fieldNames = [
-            'id' => 'id',
-            'foo' => 'foo',
-            'bar' => 'bar',
-            'baz' => 'baz',
-            'parent' => 'parent',
-        ];
+
         $classMetadata->associationMappings = [
             'parent' => [
                 'columnName' => 'parent',
