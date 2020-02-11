@@ -15,7 +15,7 @@
 
     "require": {
         "php": ">=5.5.0",
-        "doctrine/orm": "dev-master"
+        "doctrine/orm": "2.6.* || dev-master"
     },
 
     "require-dev": {
