@@ -42,3 +42,8 @@ using the same entity-manager. This can be done because the state of the runtime
 beginning of the transaction. This follows the meaning of a "rollback" => The return from a faulty state into a well-
 known state. If correctly used, this entity-manager could save some developers that care deeply about transactions a
 big headache.
+
+Please note that this component is currently only roughly tested and should be considered more like a proof-of-concept.
+If you actually *do* make the decision to use this in production environment, please test everything beforehand and
+look for any impact on performance. Please provide feedback if you actually do use this anywhere or even better, fork
+and improve it.
