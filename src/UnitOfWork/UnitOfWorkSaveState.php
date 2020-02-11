@@ -15,6 +15,8 @@ namespace Addiks\DoctrineTweaks\UnitOfWork;
 use Doctrine\ORM\UnitOfWork;
 use Webmozart\Assert\Assert;
 use Addiks\DoctrineTweaks\UnitOfWork\Restorable;
+use ReflectionObject;
+use ReflectionProperty;
 
 /**
  * This represents a save-state of a doctrine unit-of-work instance.
@@ -42,9 +44,9 @@ use Addiks\DoctrineTweaks\UnitOfWork\Restorable;
  *          }
  *      }
  *
- * #################################################################
- * ### WARNING: This is considered EXPERIMENTAL (at the moment)! ###
- * #################################################################
+ * ######################################################################
+ * ### WARNING: This is considered VERY EXPERIMENTAL (at the moment)! ###
+ * ######################################################################
  */
 final class UnitOfWorkSaveState implements Restorable
 {
@@ -67,38 +69,25 @@ final class UnitOfWorkSaveState implements Restorable
 
     public function __construct(UnitOfWork $unitOfWork)
     {
-        Assert::null($this->previousUnitOfWork);
+        Assert::null($this->targetUnitOfWork);
         $this->targetUnitOfWork = $unitOfWork;
         $this->unitOfWorkInOriginalState = clone $unitOfWork;
     }
 
     public function restore(): void
     {
-        /** @var array<string, array<string, mixed>> $originalIdentityMap */
-        $originalIdentityMap = $this->unitOfWorkInOriginalState->getIdentityMap();
+        $reflectionObject = new ReflectionObject($this->targetUnitOfWork);
 
-        /** @var array<string, array<string, mixed>> $currentIdentityMap */
-        $currentIdentityMap = $this->targetUnitOfWork->getIdentityMap();
+        foreach ($reflectionObject->getProperties() as $reflectionProperty) {
+            /** @var ReflectionProperty $reflectionProperty */
 
-        foreach ($currentIdentityMap as $entityName => $identities) {
-            /** @var array<string, mixed> $originalIdentities */
-            $originalIdentities = $originalIdentityMap[$entityName] ?? [];
+            $reflectionProperty->setAccessible(true);
 
-            foreach ($identities as $objectHash => $entity) {
-                if (!isset($originalIdentities[$objectHash])) {
-                    $this->targetUnitOfWork->removeFromIdentityMap($entity);
-                    $this->targetUnitOfWork->setOriginalEntityData($entity, []);
-                }
-            }
-        }
+            /** @var mixed $value */
+            $value = $reflectionProperty->getValue($this->unitOfWorkInOriginalState);
 
-        foreach ($originalIdentityMap $entityName => $identities) {
-
-            foreach ($identities as $objectHash => $entity) {
-                $this->targetUnitOfWork->setOriginalEntityData(
-                    $entity,
-                    $this->unitOfWorkInOriginalState->getOriginalEntityData($entity)
-                );
+            if (is_array($value)) {
+                $reflectionProperty->setValue($this->targetUnitOfWork, $value);
             }
         }
     }
