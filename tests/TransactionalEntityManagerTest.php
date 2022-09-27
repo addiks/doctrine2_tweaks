@@ -10,8 +10,7 @@
 
 namespace Addiks\Doctrine\Tests;
 
-use PHPUnit_Framework_TestCase;
-use Doctrine\Common\Persistence\Mapping\Driver\StaticPHPDriver;
+use PHPUnit\Framework\TestCase;
 use Doctrine\Common\EventManager;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Configuration as DBALConfiguration;
@@ -25,8 +24,9 @@ use Addiks\DoctrineTweaks\Tests\SampleEntity;
 use Addiks\DoctrineTweaks\TransactionalEntityManager;
 use Addiks\DoctrineTweaks\TransactionalEntityManagerInterface;
 use Doctrine\Tests\TestUtil;
+use Doctrine\Persistence\Mapping\Driver\StaticPHPDriver;
 
-class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
+class TransactionalEntityManagerTest extends TestCase
 {
 
     /**
@@ -34,8 +34,10 @@ class TransactionalEntityManagerTest extends PHPUnit_Framework_TestCase
      */
     protected $entityManager;
 
-    public function setUp()
+    public function setUp(): void
     {
+        $GLOBALS['db_driver'] = 'pdo_sqlite';
+        
         /* @var $connection Connection */
         $connection = TestUtil::getConnection();
 
