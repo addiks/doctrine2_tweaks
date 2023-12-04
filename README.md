@@ -7,6 +7,45 @@ This repository represents a collection of alternative components with tweaks an
 doctrine2-project.
 
 
+# UnitOfWork Save-State
+
+**Addiks\DoctrineTweaks\UnitOfWork\UnitOfWorkSaveState**
+
+This represents a save-state of a doctrine unit-of-work instance.
+Using this, you can always revert the state of a unit-of-work instance back to a previous state.
+
+This can be useful for bulk-operations:
+Create a save-state at the beginning of the bulk-process and then restore it after every flush.
+That way the unit-of-work will never contain objects that were already flushed, saving memory and (execution-)time.
+
+This differs from a simple entity-manager `clear` call because it leaves all objects in the unit-of-work that were
+in it when the save state was created. Keeping these objects in it can (and often will) help with keeping the state
+of the unit-of-work consistent with the rest of the application.
+
+Remember to also call "gc_collect_cycles()" when restoring to actually free the memory.
+
+Example:
+
+```php
+<?php
+
+use Addiks\DoctrineTweaks\UnitOfWork\UnitOfWorkSaveState;
+
+$saveState = new UnitOfWorkSaveState($entityManager->getUnitOfWork());
+
+foreach ($thingsToImport as $counter => $thing) {
+
+    $importer->import($thing); # Import a thing, add it to a collection or something
+
+    if ($counter % 100 === 0) {
+        $entityManager->flush(); # Send new entities to database
+        $saveState->restore(); # Remove imported entities from unit-of-work
+        gc_collect_cycles(); # Clean up memory
+    }
+}
+```
+
+
 # Transactional Entity-Manager:
 
 **Addiks\DoctrineTweaks\TransactionalEntityManager** (Alternative for [Doctrine\ORM\EntityManager](https://github.com/doctrine/doctrine2/blob/master/lib/Doctrine/ORM/EntityManager.php))
